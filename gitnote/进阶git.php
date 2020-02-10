@@ -201,7 +201,30 @@
 
 /**
  *  9. github
- *      
+ *    添加远程仓库地址:
+ *      git remote add origin https://xxxxx
+ *    推送时候产生关联(第一次)
+ *      git push -u origin master
+ *    查看仓库配置信息
+ *      git remote -v
+ */
+
+
+/**
+ *  10. ssh 免密钥登陆
+ *    ssh-keygen 进行设置密钥
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  *
  *
@@ -214,7 +237,6 @@
  *
  *
  */
-
 
 
 
