@@ -1,0 +1,4 @@
+由于这两者的账户都是需要外网的连接，所以推荐以下方式。进入网盘下载accounts.json文件，链接地址：https://pan.baidu.com/s/1qBbifQh7b-exV_b9IrfvwA 密码：w4d5  ； 将该文件拷到C:\Users\Administrator\AppData\Local\Atlassian\SourceTree文件夹下。关掉sourcetree的安装页面，重新双击SourceTreeSetup-2.5.5.exe文件，再次安装会发现直接进入了如下页面：
+————————————————
+版权声明：本文为CSDN博主「jiangzi01」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/sinat_38334334/article/details/80665191
