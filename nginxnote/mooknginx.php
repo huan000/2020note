@@ -61,7 +61,7 @@
  *          设置额外的参数链接到系统库
  *             --with-ld-opt=parameter
  *
- *      2.10 nginx.conf 的基础配置语法
+ *      2.10 nginx.conf 的基础配置语法。
  *              
  *
  *
