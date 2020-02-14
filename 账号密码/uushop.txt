@@ -1,0 +1,5 @@
+uu商城 : https://gitee.com/vtslele/youyou.git
+
+uu后台：账号 admin 
+              密码 uusc2019@  
+              地址 : https://tshop.youhuangou.com/admin/index.php  
