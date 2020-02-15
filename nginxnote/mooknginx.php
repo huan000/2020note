@@ -62,7 +62,181 @@
  *             --with-ld-opt=parameter
  *
  *      2.10 nginx.conf 的基础配置语法。
- *              
+ *          额外配置文件 :
+ *          http{
+ *            ...
+ *
+ *
+ *            include /etc/nginx/conf.d/*.conf;    包含的额外配置文件
+ *          }
+ *
+ *          全局配置 :
+ *          user        设置nginx服务的系统使用用户
+ *          worker_processes        设置工作进程数
+ *          error_log               nginx 的错误配置日志
+ *          pid                     nginx 启动时候的pid文件
+ *
+ *          events配置 :
+ *          events{
+                worker_connections 1024;  每个进程允许的最大链接数
+ *              use  4;                   工作进程数
+ *          }
+ *
+ *
+ *          server配置:
+ *          server{
+                listen 80;
+ *              server_name localhost;
+ *              location / {
+                    root /dir;
+ *                  index index.html index.php;
+ *              }
+ *              error_page  500 502 504  /50x.html;  如果错误的响应码路由到/50x.html 路径中
+ *              location = /50x.html {
+                    root /root/fault;
+ *              }
+ *          }
+ *
+ *
+ *      2.11 : nginx的目录和配置语法
+ *          http{
+                sendfile  on;               是否提高静态文件的传输效率 避开用户空间
+ *              keepalive_timeout 65;       设置客户端和服务端的超时时间
+ *              include  /etc/nginx/conf.d/*.conf;      设置额外的配置文件
+ *          }
+ *
+ *
+ *      2.12 ： http请求
+ *
+ *
+ *      2.13 14： nginx日志
+ *          nginx日志类型 : 包括 error.log  access_log
+ *          log_format  name;      只能配置到http段中
+ *
+ *          日志变量 :
+ *          HTTP 请求变量 ：arg_PARAMETER , http_HEADER, sent_http_HEADER;
+ *          例子  记录请求中的 user-agent ；
+ *              $http_user_agent  ;  全是小写和下划线组成的
+ *
+ *          内置变量 -   Nginx内置的变量
+ *
+ *          自定义变量
+ *
+ *      2.15 : nginx 模块讲解
+ *          nginx 官方模块
+ *          第三方模块
+ *
+ *      2.16 ： --with-http_stub_status_module  模块详解
+ *          该模块主要展示nginx的状态
+ *          开启位置 server , location 段中
+ *      编译安装:
+ *      --prefix=/usr/local/software/nginx-1.15.9  --with-http_stub_status_module
+ *      使用:
+ *      location /stub {
+            stub_status;
+ *      }
+ *
+ *      结果 :
+ *      Active connections: 1       目前活跃
+        server accepts handled requests
+        1 1 2
+ *      握手数     链接数     总请求数
+        Reading: 0 Writing: 1 Waiting: 0
+ *      正在读  正在写  正在等待
+ *
+ *
+ *      2-17 : nginx模块详解  默认模块
+ *      --with-http_random_index_module  目录中选择一个随机主页
+ *      --prefix=/usr/local/software/nginx-1.15.9 --with-http_stub_status_module  --with-http_random_index_module
+
+ *          默认是关闭的
+ *          配置区 ： location
+ *      location / {
+ *          random_index on;      自动选择文件
+ *      }
+ *
+ *
+ *      2-18 : nginx模块详解 sub_module
+ *      --with-http_sub_module   http 内容替换
+ *
+ *      syntax : sub_filter string replacement;
+ *      context :  http , server , location
+ *      default :  ----- 没有
+ *
+ *      syntax : sub_filter_last_modified  on |  off ;
+ *      default : sub_filter_last_modified off;
+ *      context : http , server , location ;
+ *      作用: 如果发生更新 返回最新的html代码 没有更新则返回缓存
+ *
+ *      syntax : sub_filter_once on | off;
+ *      default :  sub_filter_once on;
+ *      context ： http server location
+ *      作用: 匹配所有html代码里的第一个字符串 还是匹配所有  默认是匹配第一个
+ *
+ *
+ *      2-19 ： sub_module 演示
+ *          location / {
+ *              sub_filter '<a>immoc'  '<a>IMMOC' ;     替换html的内容
+ *              sub_filter_once off；                   替换全文
+ *          }
+ *
+ *
+ *      2-20 ： nginx的请求限制
+ *          连接频率的限制 : limit_conn_module
+ *          请求频率的限制 : limit_req_module
+ *          http1.0  tcp 不能复用
+ *          http1.1  顺序性tcp复用
+ *          http2.0  多路复用tcp
+ *
+ *          链接限制 :
+ *          syntax ： limit_conn_zone key zone=name:size;
+ *          default ： --
+ *          context ； http
+ *          作用: 申请空间的大小
+ *
+ *
+ *          syntax : limit_conn zone number;
+ *          default : --
+ *          context : http ,server , location;
+ *          作用 :  限制的并发
+ *
+ *      2.21 : 请求限制的配置语法
+ *          syntax : limit_req_zone  key zone=name:size  rate = rate;
+ *          default : --;
+ *          context : http
+ *        示例：
+ *          http {
+                limit_req_zone $binary_remote_addr zone=req_zone:1m rete=1r/s;
+ *          }
+ *
+ *          syntax : limit_req zone=name  number nodelay;
+ *          default : ---;
+ *          context : http ,server, location;
+ *        示例:
+ *          location / {
+                limit_req zone=reqzone brust=3 nodelay;
+ *          }
+ *
+ *      
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  *
  *
