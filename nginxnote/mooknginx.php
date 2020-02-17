@@ -216,12 +216,63 @@
  *          location / {
                 limit_req zone=reqzone brust=3 nodelay;
  *          }
+ *        burst=3 ； 保证下一秒肯定有三个请求
  *
  *      
+ *      2.23 - 30: nginx的访问控制
+ *        基于ip的访问控制 http_access_module
+ *          syntax ： allow address | CIDR | UNIX | ALL;
+ *          default ：——————
+ *          context : http ,  server , location , limit_except
+ *
+ *          syntax : deny address | CIDR | UNIX | ALL;
+ *          default ： ---
+ *          context : http , server ,location , limit_except
+ *
+ *          例子 : location / {
+                allow 192.168.31.142;
+ *              deny all;
+ *          }
+ *          上面也可以反过来
+ *          功能限制 : 这个是通过 remote_addr 进行访问控制限制的
+ *          如果中间有代理服务器的话  那么最终的server 的 remote_addr 显示的是 代理服务器的ip
+ *          而http_x_forwarded_for = clientip,proxy1,proxy2;
+ *
+ *          解决局限性的方法 :
+ *          1. 采用 http_x_forward_for
+ *          2. 结合geo模块
+ *          3. 通过http自定义变量传递
+ *
+ *        基于用户的信任登陆    http_auth_basic_module
+ *          syntax: auth_basic string | off;
+ *          default： auth_basic off;
+ *          context: http,server,location,limit_except
+ *          作用 输入密码的提示信息
+ *
+ *          syntax: auth_basic_user_file file;
+ *          default: --- ;
+ *          context: http,server,location,limit_except;
+ *          作用 存用户名和密码信息的文件
+ *
+ *          示例 ：
+ *          location / {
+                auth_basic "interpassward";
+ *              auth_basic_user_file ./auth_conf;
+ *          }
+ *
+ *          密码文件的格式:
+ *          name1:pass1:comment
+ *          name2:pass2
+ *
+ *          生成密码文件：
+ *          安装 yum httpd-tools
+ *          htpasswd -c ./auth_conf  leo
+ *
+ *      局限性 : 1. 用户信息依赖文件的方式
+ *               2. 操作管理机械 效率低下
  *
  *
- *
- *
+ *  3.1-5 ： 
  *
  *
  *
