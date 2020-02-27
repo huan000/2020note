@@ -272,7 +272,193 @@
  *               2. 操作管理机械 效率低下
  *
  *
- *  3.1-5 ： 
+ *  3.1-5 ：
+ *      静态资源服务场景 : cdn
+ *      例如服务器在新疆，将内容分发到北京的服务器上，那么北京的用户就可以快速的请求到
+ *      资源
+ *
+ *      相关拓展模块
+ *      syntax : sendfile  on | off;
+ *      default : sendfile off;
+ *      context : http , server , location , if in location
+ *
+ *      tcp_nopush :
+ *      syntax : tcp_nopush  on | off;
+ *      default : tcp_nopush off;
+ *      context : http , server ,location;
+ *      作用： sendfile 开启的情况下 ，提高网络包的传输效率
+ *      多个tcp包可以合并发送 节省链接的资源
+ *
+ *      tcp_nodelay
+ *      syntax : tcp_nodelay  on | off;
+ *      default : tcp_nodeay on;
+ *      context : http , server ,location;
+ *      作用 ： keepalive 链接下 ， 提高网络包的传输实时性 有tcp包就进行发送  于上面
+ *      形成对应
+ *
+ *      压缩 ：
+ *      syntax : gzip  on|off;
+ *      default : gzip off;
+ *      context :  http , server , location
+ *      作用 : 服务端进行压缩  客户端进行解压缩进行读取
+ *
+ *
+ *      syntax : gzip_comp_level  level;
+ *      default :  gzip_comp_level 1;
+ *      context :  http , server , location
+ *      作用 ：控制压缩比
+ *
+ *      syntax ： gzip_http_version 1.0 | 1.1;
+ *      default : gzip_http_version 1.1;
+ *      context :  http , server , location
+ *
+ *
+ *      预读gzip功能的相关模块 : http_gzip_static_module  预读gzip功能
+ *      支持gunzip的压缩方式(部分浏览器不支持gzip压缩):http_gunzip_module
+ *
+ *      例子 :
+ *      location / {
+            gzip on;
+ *          gzip_http_version 1.1;
+ *          gzip_comp_level 1;
+ *          gzip_types text/plain  ... ;
+ *      }
+ *
+ *
+ *     3.6 浏览器的缓存机制
+ *      http协议定义的缓存机制 如: expires , cache-control 等等
+ *      访问流程 :
+ *      无缓存情况:
+ *      浏览器请求 -> 无缓存 -> 请求web服务器 -> 请求响应，协商 -> 呈现
+ *      有缓存情况:
+ *      浏览器请求 -> 有缓存 -> 效验过期 ->
+ *      如果过期:
+ *      请求etag 如果有向web服务器请求带if-none-match 或者 304 到客户端
+ *      如果etag 没有请求last-modified 向服务器请求中带if-modified-since 返回304 到客户端
+ *      如果都没有 重新请求数据返回200 到客户端
+ *
+ *      如果没过期:
+ *      直接从缓存中读取
+ *
+ *
+ *
+ *      如何效验过期:
+ *      是否过期: expires 1.0  ,  cache-control(max-age) 1.1
+ *         作用 : 通过cache-control 后面的时间信息判断本地缓存是否过期 如果过期了重新访问服务器
+ *      协议中etag头信息校验: etag
+ *         作用 : 如果本地缓存过期了 判断服务器的文件是否有更改 通过校验码
+ *          因为last-modified 只能够精确到秒 所有etag的出现可以进行是否修改了文件的识别
+ *      last-modified头信息校验: Last-Modified
+ *         作用 : 如果本地缓存的文件过期了 判断服务器的文件的时间是否有更改
+ *
+ *      nginx 中配置缓存的响应头
+ *      添加cache-control ，expire头
+ *      syntax : expires [modified] time;
+ *      default : expires off;
+ *      context : http , server ,location
+ *
+ *      例子 :
+ *      location \ {
+            expires  24h;
+ *          root /opt/app/code;
+ *      }
+ *      作用: 如果加上就会在响应头中返回 etag 和 last-modified
+ *
+ *      在有缓存的时候 ： 浏览器会通过自身行为在请求头中添加Cache-Control：max-age=0
+ *      这样在每回请求的时候都会去校验etag 和 last-modified
+ *      但是如果加了 expires 24h； 响应头中会有 Cache-Control:max-age=86400
+ *
+ *      3.8 跨域访问
+ *      syntax: add_header name value [always];
+ *      default : ---;
+ *      context: http ,server, location;
+ *
+ *      Access-Control-Allow-Origin
+ *
+ *
+ *      3.9： 跨站访问场景配置
+ *      例子 ：
+ *      location / {
+            add_header Access-Control-Allow-Origin http://www.jesonc.com;
+ *          add_header Access-Control-Allow-Methods GET,POST,PUT,DELETE,OPTIONS;
+ *          root /html;
+ *      }
+ *
+ *      2.10.11 : 防盗链
+ *      目的 : 防止网站资源被盗用
+ *      防盗链的设置思路 :
+ *      首要方式： 区别哪些请求是非正常的用户请求
+ *      基于http_refer 防盗链配置模块: http_refer 代表上一个页面的地址信息
+ *
+ *      例子 :
+ *      location / {
+            valid_referers none blocked 116.12.132.21;
+ *          if($invalid_referer){       // 如果上面的条件不满足 则invalid_referer会为1
+                return 403;
+ *          }
+ *          root /html;
+ *      }
+ *      note : none 允许没有referer信息的过来
+ *             blocked  允许不是http:// 这种标准形式过来的请求
+ *             只允许 特定ip过来进行访问
+ *
+ *      3.12 ： nginx作为代理服务器
+ *      代理模式 : 客户端 -> 代理服务器 -> 服务端
+ *      nginx 可以实现 http,icmp,pop,imap,https,trmp 等请求协议的代理
+ *
+ *      正向代理 和 反向代理
+ *      区别 : 代理的对象不一样 ， 正向代理的对象是客户端 (代理服务器当作一个客户端继续请求)
+ *                                反向代理的对象是服务端  (代理服务器是服务端)
+ *
+ *      3.13 ： 代理服务器的配置语法
+ *      syntax ： proxy_pass URL;
+ *      default : --;
+ *      context : location
+ *      作用: 当请求到这台nginx服务器以后，代理服务器继续请求的服务器地址
+ *
+ *      反向代理配置示例:
+ *      location / {
+            proxy_pass http://xxx.xxx.xxx.xx:80;
+ *      }
+ *      作用: 将请求转发到某台服务器上
+ *
+ *      正向代理的配置 :
+ *      服务器 :
+ *      location / {
+            if ( $http_x_forwarded_for !~* "^116\.62\.103\.228"){
+ *              return 403;
+ *          }
+ *          root /html;
+ *      }
+ *
+ *      客户端服务器:
+ *      location / {
+ *          resolver 8.8.8.8;
+            proxy_pass http://$http_host$request_uri;
+ *
+ *      }
+ *
+ *      3.16 ：代理语法补充
+ *      
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  *
  *
  *
