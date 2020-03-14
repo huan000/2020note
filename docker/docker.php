@@ -250,13 +250,39 @@
  *      如果访问外网的话 通过docker0 进行nat 网络地址转换成 eth0 的地址
  *      作为linux 主机的数据包 就可以访问外网了
  *
+ *   4-5 :  容器之间的link
+ *      两个容器之间根据name进行绑定
+ *      docker run -d -t --name test2 --link test1 centos1 /bin/bash
+ *      note: link是有方向的，是从test2 link 到 test1 ,反过来不行
+ *      但是如果两个容器都链接到用户自己创建的bridge上面，那么两个容器默认是创建好了的
+ *
+ *      docker network ls ： 默认链接的是bridge网络链接
+ *
+ *      创建一个网络链接 :
+ *      docker network create -d bridge my-bridge
+ *
+ *      启动时选择网络链接 :
+ *      --network my-bridge
+ *
+ *      后期选择网络链接 :
+ *      docker network connect my-bridge test1
+ *
+ *
+ *   4-6 :  容器的端口映射
+ *      查看bridge的网络地址：
+ *      docker network inspect bridge
+ *
+ *      进行端口映射:
+ *      docker run --name web -p 80:80 nginx
+ *      将container的80端口映射为本地主机的80端口
+ *
+ *   4-7 :  容器网络 none 和  host
+ *      docker run -d -t --name test1 --network none contos /bin/bash
+ *      none : 是一个孤立的网络环境，用于存储密码之类的信息 外部是无法访问的
+ *      host : 和主机共享一个网络空间，但是会带来端口冲突之类的问题
+ *
+ *   4-8 ： 多容器复杂应用的部署
  *      
- *
- *
- *
- *
- *
- *
  *
  *
  *
